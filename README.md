@@ -33,7 +33,7 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/switchmaxfx/manga-processor.git
+   git clone https://github.com/switchmaxfx/MangaProcessor.git
    cd manga-processor
 
 2. Install dependencies:
