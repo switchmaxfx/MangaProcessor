@@ -1,16 +1,55 @@
-# MangaProcessor
-A Python-based tool for manga enthusiasts to compress images, bundle them into CBZ files, and reverse the process when needed.
+# Manga Processor Tool 📚  
 
-Manga Processor Tool 📚
+A versatile and efficient tool for **compressing, organizing, and processing manga image folders into `.cbz` files** and reversing `.cbz` archives back into images. Designed with automation and user-friendliness in mind, the Manga Processor is ideal for manga enthusiasts looking to clean up and manage their collections.  
 
-A versatile and efficient tool for compressing, organizing, and processing manga image folders into .cbz files and reversing .cbz archives back into images. Designed with automation and user-friendliness in mind, the Manga Processor is ideal for manga enthusiasts looking to clean up and manage their collections.
+---
 
-Features
-🔄 Forward Processing
-  Compress Images: Reduces image sizes using optimized compression while maintaining quality.
-	Create CBZ Files: Automatically bundles compressed images into .cbz files for easy viewing.
-	Folder Cleanup: Removes the original image folders after successfully creating .cbz files, keeping the directory clean.
-🔃 Reverse Processing
-	Extract CBZ Archives: Decompresses .cbz files into organized image folders.
-	Recompress Images: Optimizes and compresses extracted images to reduce file sizes.
-	Repack CBZ Files: Overwrites the original .cbz file with newly compressed images for space efficiency.
+## Features  
+
+### Forward Processing 🔄  
+- Compresses images while maintaining visual quality.  
+- Bundles optimized images into `.cbz` files.  
+- Deletes original folders after processing for a clean directory structure.  
+
+### Reverse Processing 🔃  
+- Extracts `.cbz` archives back into image folders.  
+- Recompresses extracted images to reduce file size.  
+- Recreates `.cbz` files, overwriting the originals.  
+
+---
+
+## Requirements
+- **Python 3.x**
+- **Pillow** - For image handling and compression.
+    ```bash
+   pip install pillow
+- **PyQt5** - For the graphical user interface.
+   ```bash
+   pip install pyqt5
+
+---
+
+## Installation 
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/switchmaxfx/manga-processor.git
+   cd manga-processor
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+
+3. Run the script:
+   ```bash
+   python manga_processor.py
+
+## **Usage** 🛠️  
+
+1. Start the tool and select your source folder.  
+2. Pick your mode:  
+   - **Start Full Processing**: Compress and convert images into `.cbz`.  
+   - **Reverse Process CBZ**: Extract and optimize images, then turns them back into `.cbz` files.  
+3. Watch the progress bar and console for updates! 
+4. Sit back, relax, and enjoy your perfectly processed manga. 
+
