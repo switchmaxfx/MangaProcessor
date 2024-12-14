@@ -53,3 +53,5 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 3. Watch the progress bar and console for updates! 
 4. Sit back, relax, and enjoy your perfectly processed manga. 
 
+![pythonw_YxfDaiBmzl](https://github.com/user-attachments/assets/b8de3407-1e94-44e2-9b79-f87c5b961c90)
+
