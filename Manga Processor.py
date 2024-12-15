@@ -14,10 +14,11 @@ class ProcessingThread(QThread):
     update_progress = pyqtSignal(int)
     processing_complete = pyqtSignal()
     
-    def __init__(self, source_dir, processing_type):
+    def __init__(self, source_dir, processing_type, file_conversion):
         super().__init__()
         self.source_dir = source_dir
         self.processing_type = processing_type
+        self.file_conversion = file_conversion  # New parameter for CBZ/CBR conversion
         self.stop_requested = False
 
     def run(self):
@@ -26,6 +27,8 @@ class ProcessingThread(QThread):
                 self.process_manga_folders()
             elif self.processing_type == 'reverse':
                 self.reverse_process_cbz_files()
+            elif self.processing_type == 'convert':
+                self.convert_cbz_cbr()
         except Exception as e:
             self.update_console.emit(f"Error during processing: {e}")
         finally:
@@ -165,75 +168,90 @@ class ProcessingThread(QThread):
             try:
                 # Full path of the CBZ file
                 full_cbz_path = os.path.join(self.source_dir, cbz_file)
-                
+
                 # Step 1: Extract CBZ
                 self.update_console.emit(f"\nProcessing CBZ: {cbz_file}")
                 self.update_console.emit("Stage 1: Extracting CBZ")
-                
+
                 # Create extraction folder (same name as CBZ without extension)
                 extract_folder = os.path.join(self.source_dir, os.path.splitext(cbz_file)[0])
                 os.makedirs(extract_folder, exist_ok=True)
-                
+
                 # Extract the CBZ
                 with zipfile.ZipFile(full_cbz_path, 'r') as zip_ref:
                     zip_ref.extractall(extract_folder)
-                
+
                 # Step 2: Compress extracted images
                 self.update_console.emit("Stage 2: Compressing Extracted Images")
                 image_files = [
-                    os.path.join(root, file) 
-                    for root, dirs, files in os.walk(extract_folder) 
-                    for file in files 
+                    os.path.join(root, file)
+                    for root, _, files in os.walk(extract_folder)
+                    for file in files
                     if file.lower().endswith((".png", ".jpg", ".jpeg"))
                 ]
-                
-                # Compress each image and update progress
+
                 for image_path in image_files:
                     if self.stop_requested:
-                        break
-                    
+                        self.update_console.emit("Processing stopped by user")
+                        return
+
                     try:
                         image = Image.open(image_path)
                         image.save(image_path, optimize=True, quality=50)
                         self.update_console.emit(f"Compressed: {image_path}")
-                        
+
                         # Update progress
                         processed_pages += 1
                         progress_percentage = int((processed_pages / total_pages) * 100)
                         self.update_progress.emit(progress_percentage)
-                        
                     except Exception as e:
                         self.update_console.emit(f"Error compressing {image_path}: {e}")
-                
-                # Step 3: Repack into CBZ and overwrite original
+
+                # Step 3: Repack into CBZ
                 self.update_console.emit("Stage 3: Repacking into CBZ")
-                
-                # Create a new zip file in the same directory
-                with zipfile.ZipFile(full_cbz_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                    # Walk through the extracted directory
-                    for root, dirs, files in os.walk(extract_folder):
-                        # Calculate the relative path
-                        relative_root = os.path.relpath(root, extract_folder)
-                        
-                        # Add files to the zip
+                new_cbz_path = os.path.join(self.source_dir, cbz_file)
+                with zipfile.ZipFile(new_cbz_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for root, _, files in os.walk(extract_folder):
                         for file in sorted(files):
                             file_path = os.path.join(root, file)
-                            arcname = os.path.join(relative_root, file)
+                            arcname = os.path.relpath(file_path, extract_folder)
                             zipf.write(file_path, arcname=arcname)
-                
-                # Clean up extracted folder
+
+                # Remove extracted folder
                 shutil.rmtree(extract_folder)
-                
-                self.update_console.emit(f"Processed and Overwritten: {cbz_file}")
+                self.update_console.emit(f"Repacked and Overwritten: {cbz_file}")
 
             except Exception as e:
                 self.update_console.emit(f"Error processing {cbz_file}: {e}")
 
-        if not self.stop_requested:
-            self.update_console.emit("\nReverse Processing Complete! UwU!")
-            self.update_progress.emit(100)
+        self.update_console.emit("\nReverse Processing Complete!")
 
-# Rest of the code remains the same as in the previous script (MangaProcessor class and main block)
+    def convert_cbz_cbr(self):
+        if not self.source_dir:
+            self.update_console.emit("Please select a source folder.")
+            return
+
+        files_to_convert = [
+            f for f in os.listdir(self.source_dir)
+            if f.lower().endswith((".cbz", ".cbr"))
+        ]
+
+        for file in files_to_convert:
+            if self.stop_requested:
+                self.update_console.emit("Conversion stopped by user")
+                break
+
+            old_path = os.path.join(self.source_dir, file)
+            new_extension = ".cbr" if file.lower().endswith(".cbz") else ".cbz"
+            new_path = os.path.join(self.source_dir, os.path.splitext(file)[0] + new_extension)
+            
+            try:
+                os.rename(old_path, new_path)
+                self.update_console.emit(f"Converted: {file} -> {os.path.basename(new_path)}")
+            except Exception as e:
+                self.update_console.emit(f"Error converting {file}: {e}")
+
+        self.update_console.emit("\nFile Conversion Complete!")
 
 class MangaProcessor(QMainWindow):
     def __init__(self):
@@ -274,23 +292,21 @@ class MangaProcessor(QMainWindow):
         self.reverse_process_button.clicked.connect(self.start_reverse_processing)
         self.reverse_process_button.setStyleSheet("background-color: #0066CC; color: #FFFFFF; border: none; padding: 8px 16px;")
 
-        # Stop button (smaller size)
+        # Convert CBZ/CBR button
+        self.convert_button = QPushButton("Convert CBZ/CBR")
+        self.convert_button.clicked.connect(self.start_conversion)
+        self.convert_button.setStyleSheet("background-color: #FF9900; color: #FFFFFF; border: none; padding: 8px 16px;")
+
+        # Stop button
         self.stop_button = QPushButton("Stop")
         self.stop_button.clicked.connect(self.stop_processing)
-        self.stop_button.setStyleSheet("""
-            background-color: #CC0000; 
-            color: #FFFFFF; 
-            border: none; 
-            padding: 8px 16px;  /* Same vertical padding as other buttons */
-            font-size: 12px;    /* Closer to other button font sizes */
-            max-width: 80px;    /* Keeps button narrow */
-            width: 80px;        /* Explicitly set width */
-        """)
-        self.stop_button.setEnabled(False)  # Initially disabled
+        self.stop_button.setStyleSheet("background-color: #CC0000; color: #FFFFFF; border: none; padding: 8px 16px; max-width: 80px; width: 80px;")
+        self.stop_button.setEnabled(False)
 
         # Add buttons to button layout
         button_layout.addWidget(self.process_button)
         button_layout.addWidget(self.reverse_process_button)
+        button_layout.addWidget(self.convert_button)
         button_layout.addWidget(self.stop_button)
 
         # Progress bar
@@ -300,16 +316,8 @@ class MangaProcessor(QMainWindow):
         # Console output
         self.console_output = QTextEdit()
         self.console_output.setReadOnly(True)
-        self.console_output.setStyleSheet("""
-            background-color: #444444; 
-            color: #FFFFFF; 
-            border: 1px solid #666666; 
-            padding: 5px;
-            font-size: 11px;
-            font-family: 'Consolas', 'Courier New', monospace;
-        """)
+        self.console_output.setStyleSheet("background-color: #444444; color: #FFFFFF; border: 1px solid #666666; padding: 5px; font-size: 11px; font-family: 'Consolas', 'Courier New', monospace;")
         
-        # Optional: Set a larger font for even better readability
         font = QFont()
         font.setPointSize(12)
         self.console_output.setFont(font)
@@ -321,15 +329,10 @@ class MangaProcessor(QMainWindow):
         main_layout.addWidget(QLabel("Console Output:"))
         main_layout.addWidget(self.console_output)
 
-        # Create central widget
         central_widget = QWidget()
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
-
-        # Keep track of current processing thread
         self.current_thread = None
-
-    # Rest of the methods remain the same as in the previous script
 
     def browse_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
@@ -340,9 +343,7 @@ class MangaProcessor(QMainWindow):
         if not source_dir:
             self.console_output.append("Please select a source folder.")
             return
-
-        # Create and start processing thread
-        self.current_thread = ProcessingThread(source_dir, 'forward')
+        self.current_thread = ProcessingThread(source_dir, 'forward', None)
         self.setup_thread(self.current_thread)
         self.current_thread.start()
 
@@ -351,24 +352,27 @@ class MangaProcessor(QMainWindow):
         if not source_dir:
             self.console_output.append("Please select a source folder.")
             return
+        self.current_thread = ProcessingThread(source_dir, 'reverse', None)
+        self.setup_thread(self.current_thread)
+        self.current_thread.start()
 
-        # Create and start reverse processing thread
-        self.current_thread = ProcessingThread(source_dir, 'reverse')
+    def start_conversion(self):
+        source_dir = self.source_folder_input.text()
+        if not source_dir:
+            self.console_output.append("Please select a source folder.")
+            return
+        self.current_thread = ProcessingThread(source_dir, 'convert', None)
         self.setup_thread(self.current_thread)
         self.current_thread.start()
 
     def setup_thread(self, thread):
-        # Connect thread signals
         thread.update_console.connect(self.update_console)
         thread.update_progress.connect(self.update_progress)
         thread.processing_complete.connect(self.processing_complete)
-
-        # Disable buttons and enable stop button
         self.process_button.setEnabled(False)
         self.reverse_process_button.setEnabled(False)
+        self.convert_button.setEnabled(False)
         self.stop_button.setEnabled(True)
-
-        # Reset progress bar
         self.progress_bar.setValue(0)
 
     def stop_processing(self):
@@ -383,9 +387,9 @@ class MangaProcessor(QMainWindow):
         self.progress_bar.setValue(value)
 
     def processing_complete(self):
-        # Re-enable buttons and disable stop button
         self.process_button.setEnabled(True)
         self.reverse_process_button.setEnabled(True)
+        self.convert_button.setEnabled(True)
         self.stop_button.setEnabled(False)
         self.current_thread = None
 
