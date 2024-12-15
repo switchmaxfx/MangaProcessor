@@ -14,7 +14,10 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 ### Reverse Processing 🔃  
 - Extracts `.cbz` archives back into image folders.  
 - Recompresses extracted images to reduce file size.  
-- Recreates `.cbz` files, overwriting the originals.  
+- Recreates `.cbz` files, overwriting the originals.
+
+### Rename CBZ to CBR 🔃  
+- Can also rename your CBZ files to CBR format. 
 
 ---
 
