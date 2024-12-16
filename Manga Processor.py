@@ -76,7 +76,7 @@ class ProcessingThread(QThread):
                 os.makedirs(os.path.dirname(temp_image_path), exist_ok=True)
 
                 # Save compressed image
-                image.save(temp_image_path, optimize=True, quality=50)
+                image.save(temp_image_path, optimize=True, quality=75)
                 self.update_console.emit(f"Compressed: {image_path}")
 
                 # Update progress
@@ -197,7 +197,7 @@ class ProcessingThread(QThread):
 
                     try:
                         image = Image.open(image_path)
-                        image.save(image_path, optimize=True, quality=50)
+                        image.save(image_path, optimize=True, quality=75)
                         self.update_console.emit(f"Compressed: {image_path}")
 
                         # Update progress
