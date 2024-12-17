@@ -13,16 +13,14 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 
 ### Reverse Processing 🔃  
 - Extracts `.cbz` archives back into image folders.  
-- Recompresses extracted images to reduce file size.  
+- Recompresses extracted images to reduce file size (optional, toggleable).
 - Recreates `.cbz` files, overwriting the originals.
 
 ### Rename CBZ to CBR 🔃  
-- Can also rename your CBZ files to CBR format.
+- Rename .cbz files to .cbr format or vice versa.
 
 ### New Features (Added) 🌟
 - **Toggle Compression**: Enable or disable image compression with a single click.
-- **Metadata Stripping**: Automatically removes unnecessary metadata (like EXIF data) from images to reduce file size.
-- **Efficient ZIP Compression**: Uses Zopfli for highly optimized ZIP compression, resulting in smaller .cbz files.
 
 ---
 
@@ -35,9 +33,6 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 - **PyQt5** - For the graphical user interface.
    ```bash
    pip install pyqt5
-- **Optional**: For better ZIP compression, install Zopfli.
-   ```bash
-   pip install zopfli
 
 ---
 
@@ -78,29 +73,24 @@ A versatile and efficient tool for **compressing, organizing, and processing man
   
 ### **Convert CBZ to CBR**
 
-1. Select your source folder containing .cbz files.
-2. Click Convert CBZ/CBR to rename .cbz files to .cbr format.
+1. Select your source folder containing .cbz or .cbr files.
+2. Click Convert CBZ/CBR to rename .cbz files to .cbr format and vice versa.
 
 ### **Toggle Compression**
 
 - Use the Compress On/Off button to enable or disable image compression.
-  - **Green**: Compression is enabled.
-  - **Red**: Compression is disabled.
-
----
-
-## **Advanced Features**
-
-### **Metadata Stripping**
- - Automatically removes unnecessary metadata (like EXIF data) from images to reduce file size.
-
-### **Efficient ZIP Compression**
- - Uses Zopfli for highly optimized ZIP compression, resulting in smaller .cbz files.
- - If Zopfli is not installed, the tool falls back to standard ZIP compression.
+  - **Checked**: Compression is enabled.
+  - **Unchecked**: Compression is disabled.
 
 ---
 
 ## **Screenshots**
 
-![image](https://github.com/user-attachments/assets/90e016b6-6435-4b26-933b-8777e2222e54)
+![image](https://github.com/user-attachments/assets/1c4647fe-da90-4426-b9a7-b8c7181ed77d)
+
+---
+
+## **Contributing**
+
+I have no idea what im doing so feel free to contribute to the project by opening issues or submitting pull requests. Any improvements or new features are welcome.
 
