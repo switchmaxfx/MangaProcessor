@@ -252,7 +252,7 @@ class ProcessingThread(QThread):
 
         files_to_convert = [
             f for f in os.listdir(self.source_dir)
-            if f.lower().endswith((".cbz", ".cbr"))
+            if f.lower().endswith((".cbz", ".cbr", ".zip"))  # Include .zip files
         ]
 
         for file in files_to_convert:
@@ -261,9 +261,19 @@ class ProcessingThread(QThread):
                 break
 
             old_path = os.path.join(self.source_dir, file)
-            new_extension = ".cbr" if file.lower().endswith(".cbz") else ".cbz"
+
+            # Determine the new extension
+            if file.lower().endswith(".cbz"):
+                new_extension = ".cbr"
+            elif file.lower().endswith(".cbr"):
+                new_extension = ".cbz"
+            elif file.lower().endswith(".zip"):
+                new_extension = ".cbz"  # Convert .zip to .cbz
+            else:
+                continue
+
             new_path = os.path.join(self.source_dir, os.path.splitext(file)[0] + new_extension)
-            
+
             try:
                 os.rename(old_path, new_path)
                 self.update_console.emit(f"Converted: {file} -> {os.path.basename(new_path)}")
@@ -271,6 +281,7 @@ class ProcessingThread(QThread):
                 self.update_console.emit(f"Error converting {file}: {e}")
 
         self.update_console.emit("\nFile Conversion Complete!")
+
 
 class MangaProcessor(QMainWindow):
     def __init__(self):
@@ -311,8 +322,8 @@ class MangaProcessor(QMainWindow):
         self.reverse_process_button.clicked.connect(self.start_reverse_processing)
         self.reverse_process_button.setStyleSheet("background-color: #0066CC; color: #FFFFFF; border: none; padding: 8px 16px;")
 
-        # Convert CBZ/CBR button
-        self.convert_button = QPushButton("Convert CBZ/CBR")
+        # Convert CBZ/CBR/ZIP button
+        self.convert_button = QPushButton("Convert CBZ/CBR/ZIP")
         self.convert_button.clicked.connect(self.start_conversion)
         self.convert_button.setStyleSheet("background-color: #FF9900; color: #FFFFFF; border: none; padding: 8px 16px;")
 
