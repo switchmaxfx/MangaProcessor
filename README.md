@@ -86,7 +86,8 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 
 ## **Screenshots**
 
-![image](https://github.com/user-attachments/assets/1c4647fe-da90-4426-b9a7-b8c7181ed77d)
+![image](https://github.com/user-attachments/assets/d55ba6c4-9fc8-44bc-a825-e0ad6c1a419b)
+
 
 ---
 
