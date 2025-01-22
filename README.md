@@ -93,5 +93,5 @@ A versatile and efficient tool for **compressing, organizing, and processing man
 
 ## **Contributing**
 
-I have no idea what im doing so feel free to contribute to the project by opening issues or submitting pull requests. Any improvements or new features are welcome.
+Feel free to contribute to the project by opening issues or submitting pull requests. Any improvements or new features are welcome.
 
